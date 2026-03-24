@@ -10,7 +10,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -72,7 +72,6 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
         setContentView(R.layout.activity_settings)
 
         preview = findViewById(R.id.preview)
@@ -265,7 +264,10 @@ class SettingsActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
             val valTv = TextView(this).apply {
-                text = "$initial"; textSize = 12f; setTextColor(0xFF888888.toInt())
+                text = "$initial"; textSize = 12f
+                val tv = android.util.TypedValue()
+                context.theme.resolveAttribute(android.R.attr.textColorSecondary, tv, true)
+                setTextColor(context.getColorStateList(tv.resourceId))
             }
             row.addView(lbl); row.addView(valTv)
             container.addView(row)
@@ -383,7 +385,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupRememberToggle() {
-        val sw = findViewById<SwitchCompat>(R.id.switchRemember)
+        val sw = findViewById<MaterialSwitch>(R.id.switchRemember)
         sw.isChecked = Prefs.getRememberPosition(this)
         sw.setOnCheckedChangeListener { _, checked ->
             Prefs.setRememberPosition(this, checked)
@@ -417,7 +419,7 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<SeekBar>(R.id.seekBandAlpha).progress = Prefs.alphaToSlider(Prefs.DEFAULT_BAND_ALPHA)
         findViewById<SeekBar>(R.id.seekTabAlpha).progress = Prefs.alphaToSlider(Prefs.DEFAULT_TAB_ALPHA)
         findViewById<SeekBar>(R.id.seekFeather).progress = Prefs.DEFAULT_FEATHER
-        findViewById<SwitchCompat>(R.id.switchRemember).isChecked = true
+        findViewById<MaterialSwitch>(R.id.switchRemember).isChecked = true
         updateAllValues()
         notifyService(); updatePreview()
     }

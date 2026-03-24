@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
             android:text="Preview"
-            android:textColor="#888888"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="13sp" />
 
         <com.subtitlescreen.PreviewView
@@ -67,7 +67,7 @@
                 android:id="@+id/valInnerAlpha"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -94,7 +94,7 @@
                 android:id="@+id/valFeather"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -151,7 +151,7 @@
                 android:id="@+id/valBandAlpha"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -166,7 +166,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginBottom="20dp"
-            android:background="#DDDDDD" />
+            android:background="?android:attr/listDivider" />
 
         <!-- Tab Colour -->
         <TextView
@@ -199,7 +199,7 @@
                 android:id="@+id/valTabAlpha"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#888888"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -214,9 +214,9 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginBottom="20dp"
-            android:background="#DDDDDD" />
+            android:background="?android:attr/listDivider" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/switchRemember"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
