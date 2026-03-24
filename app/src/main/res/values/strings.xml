@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Subtitle Screen</string>
+
+    <!-- Settings labels (default: US English) -->
+    <string name="blocker_colour">Blocker Color</string>
+    <string name="blocker_opacity">Blocker Opacity</string>
+    <string name="edge_blend">Edge Blend</string>
+    <string name="handle_colour">Handle Color</string>
+    <string name="band_colour">Band Color</string>
+    <string name="band_opacity">Band Opacity (0 = invisible)</string>
+    <string name="tab_colour">Collapse Tab Color</string>
+    <string name="tab_opacity">Tab Opacity (min 12%)</string>
+    <string name="custom_colour_title">Custom Color</string>
+    <string name="remember_position">Remember last position &amp; size</string>
+    <string name="reset_defaults">Reset to Defaults</string>
+    <string name="reset_confirm_title">Reset to Defaults</string>
+    <string name="reset_confirm_msg">This will reset all settings to their default values. Are you sure?</string>
+</resources>

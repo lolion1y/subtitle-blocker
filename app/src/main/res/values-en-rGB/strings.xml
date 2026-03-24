@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="blocker_colour">Blocker Colour</string>
+    <string name="handle_colour">Handle Colour</string>
+    <string name="band_colour">Band Colour</string>
+    <string name="tab_colour">Collapse Tab Colour</string>
+    <string name="custom_colour_title">Custom Colour</string>
+</resources>
