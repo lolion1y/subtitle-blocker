@@ -2,6 +2,14 @@
 <resources>
     <string name="app_name">Subtitle Screen</string>
 
+    <!-- Main activity -->
+    <string name="show_overlay">Show Overlay</string>
+    <string name="hide_overlay">Hide Overlay</string>
+    <string name="overlay_permission_required">Overlay permission required</string>
+
+    <!-- Quick settings tile -->
+    <string name="tile_label">Sub Blocker</string>
+
     <!-- Settings labels (default: US English) -->
     <string name="blocker_colour">Blocker Color</string>
     <string name="blocker_opacity">Blocker Opacity</string>
@@ -16,4 +24,7 @@
     <string name="reset_defaults">Reset to Defaults</string>
     <string name="reset_confirm_title">Reset to Defaults</string>
     <string name="reset_confirm_msg">This will reset all settings to their default values. Are you sure?</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_reset">Reset</string>
 </resources>

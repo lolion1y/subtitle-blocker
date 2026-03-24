@@ -19,7 +19,6 @@ class OverlayView(context: Context) : View(context) {
     private val handleVisualLen = dp(14f)
     private val handleStroke = dp(2.5f)
     private val collapseTouchRadius = dp(18f)
-    private val collapseLineHalf = dp(8f)
     private val tapThreshold = dp(8f)
     private val minInnerWidth = dpInt(60f)
     private val minInnerHeight = dpInt(20f)
@@ -29,17 +28,21 @@ class OverlayView(context: Context) : View(context) {
     var innerWidth = 0
     var innerHeight = dpInt(80f)
 
-    // Appearance
+    // Appearance — call invalidate() after changing any of these
     var innerColor = 0x000000
+        set(v) { field = v; updatePaints() }
     var innerAlpha = 255
+        set(v) { field = v; updatePaints() }
     var bandColor = 0xFFFFFF
+        set(v) { field = v; updatePaints() }
     var bandAlpha = 0x20
+        set(v) { field = v; updatePaints() }
     var featherPx = 0f
     var handleColorOverride = Prefs.HANDLE_COLOR_AUTO
+        set(v) { field = v; updatePaints() }
 
     // Paints
     private val bandPaint = Paint()
-    private val innerPaint = Paint()
     private val handlePaint = Paint().apply {
         color = 0xFFFFFFFF.toInt()
         strokeWidth = handleStroke
@@ -66,7 +69,7 @@ class OverlayView(context: Context) : View(context) {
     // Triple-tap tracking for opening settings
     private val tapTimes = LongArray(3)
     private var tapCount = 0
-    private val tripleTapWindow = 600L // ms
+    private val tripleTapWindow = 600L
 
     // Callbacks
     var onLayoutUpdate: ((deltaY: Int, newTotalHeight: Int) -> Unit)? = null
@@ -77,7 +80,6 @@ class OverlayView(context: Context) : View(context) {
 
     private fun updatePaints() {
         bandPaint.color = (bandAlpha shl 24) or (bandColor and 0x00FFFFFF)
-        innerPaint.color = (innerAlpha shl 24) or (innerColor and 0x00FFFFFF)
         if (handleColorOverride == Prefs.HANDLE_COLOR_AUTO) {
             handlePaint.color = DrawUtils.contrastColor(innerColor, innerAlpha, 0xFF)
             collapsePaint.color = DrawUtils.contrastColor(innerColor, innerAlpha, 0x80)
@@ -85,6 +87,7 @@ class OverlayView(context: Context) : View(context) {
             handlePaint.color = (0xFF shl 24) or (handleColorOverride and 0x00FFFFFF)
             collapsePaint.color = (0x80 shl 24) or (handleColorOverride and 0x00FFFFFF)
         }
+        invalidate()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -96,8 +99,6 @@ class OverlayView(context: Context) : View(context) {
     }
 
     override fun onDraw(canvas: Canvas) {
-        updatePaints()
-
         val iL = innerLeft.toFloat()
         val iT = borderV.toFloat()
         val iR = (innerLeft + innerWidth).toFloat()
@@ -112,29 +113,23 @@ class OverlayView(context: Context) : View(context) {
 
         // Corner handles
         val h = handleVisualLen
-        // Top-left
         canvas.drawLine(iL, iT, iL + h, iT, handlePaint)
         canvas.drawLine(iL, iT, iL, iT + h, handlePaint)
-        // Top-right
         canvas.drawLine(iR, iT, iR - h, iT, handlePaint)
         canvas.drawLine(iR, iT, iR, iT + h, handlePaint)
-        // Bottom-left
         canvas.drawLine(iL, iB, iL + h, iB, handlePaint)
         canvas.drawLine(iL, iB, iL, iB - h, handlePaint)
-        // Bottom-right
         canvas.drawLine(iR, iB, iR - h, iB, handlePaint)
         canvas.drawLine(iR, iB, iR, iB - h, handlePaint)
 
-        // Collapse button (» double chevron pointing right, indicating "push to side")
+        // Collapse button (» double chevron pointing right)
         val cx = (iL + iR) / 2f
         val cy = (iT + iB) / 2f
-        val chevH = dp(5f)  // vertical half-size
-        val chevW = dp(3.5f)  // horizontal depth
-        // First >
+        val chevH = dp(5f)
+        val chevW = dp(3.5f)
         val p1 = cx - dp(1.5f)
         canvas.drawLine(p1 - chevW, cy - chevH, p1, cy, collapsePaint)
         canvas.drawLine(p1, cy, p1 - chevW, cy + chevH, collapsePaint)
-        // Second >
         val p2 = cx + dp(4.5f)
         canvas.drawLine(p2 - chevW, cy - chevH, p2, cy, collapsePaint)
         canvas.drawLine(p2, cy, p2 - chevW, cy + chevH, collapsePaint)
@@ -212,7 +207,6 @@ class OverlayView(context: Context) : View(context) {
                         val isLeft = mode == Mode.RESIZE_TL || mode == Mode.RESIZE_BL
                         val isTop = mode == Mode.RESIZE_TL || mode == Mode.RESIZE_TR
 
-                        // Horizontal
                         if (isLeft) {
                             val maxDx = innerWidth - minInnerWidth
                             val clampedDx = dx.coerceIn(-innerLeft, maxDx)
@@ -225,7 +219,6 @@ class OverlayView(context: Context) : View(context) {
                             )
                         }
 
-                        // Vertical
                         if (isTop) {
                             val maxDy = innerHeight - minInnerHeight
                             val clampedDy = dy.coerceAtMost(maxDy)
@@ -249,7 +242,6 @@ class OverlayView(context: Context) : View(context) {
                     when (mode) {
                         Mode.COLLAPSE_TAP -> onCollapse?.invoke()
                         Mode.MOVE -> {
-                            // Check if this was a tap (no significant movement)
                             val dist = hypot(
                                 (event.rawX - startRawX).toDouble(),
                                 (event.rawY - startRawY).toDouble()

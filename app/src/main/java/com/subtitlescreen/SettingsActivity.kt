@@ -26,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         0xFFFFFF, 0x000000, 0x888888, 0xFF4444, 0x44AA44, 0x4488FF,
     )
 
-    private data class ColorPicker(
+    private class ColorPicker(
         val views: MutableList<View> = mutableListOf(),
         var autoView: View? = null,
         var customView: View? = null,
@@ -292,8 +292,8 @@ class SettingsActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.custom_colour_title)
             .setView(container)
-            .setPositiveButton("OK") { _, _ -> onResult((r shl 16) or (g shl 8) or b) }
-            .setNegativeButton("Cancel", null)
+            .setPositiveButton(R.string.btn_ok) { _, _ -> onResult((r shl 16) or (g shl 8) or b) }
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 
@@ -395,8 +395,8 @@ class SettingsActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle(R.string.reset_confirm_title)
                 .setMessage(R.string.reset_confirm_msg)
-                .setPositiveButton("Reset") { _, _ -> performReset() }
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(R.string.btn_reset) { _, _ -> performReset() }
+                .setNegativeButton(R.string.btn_cancel, null)
                 .show()
         }
     }

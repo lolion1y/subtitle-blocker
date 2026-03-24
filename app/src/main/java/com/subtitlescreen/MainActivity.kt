@@ -2,7 +2,6 @@ package com.subtitlescreen
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
@@ -21,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         if (Settings.canDrawOverlays(this)) {
             startOverlay()
         } else {
-            Toast.makeText(this, "Overlay permission required", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.overlay_permission_required, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -65,12 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startOverlay() {
-        val intent = Intent(this, OverlayService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
+        startForegroundService(Intent(this, OverlayService::class.java))
         overlayActive = true
         updateButton()
     }
@@ -82,6 +76,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateButton() {
-        btnToggle.text = if (overlayActive) "Hide Overlay" else "Show Overlay"
+        btnToggle.setText(if (overlayActive) R.string.hide_overlay else R.string.show_overlay)
     }
 }

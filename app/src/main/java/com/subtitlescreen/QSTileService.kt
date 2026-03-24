@@ -39,15 +39,8 @@ class QSTileService : TileService() {
         if (wasRunning) {
             stopService(Intent(this, OverlayService::class.java))
         } else {
-            val intent = Intent(this, OverlayService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
+            startForegroundService(Intent(this, OverlayService::class.java))
         }
-        // Set tile state immediately based on the action we just took,
-        // rather than reading isRunning which hasn't updated yet
         setTileState(!wasRunning)
     }
 
@@ -58,7 +51,7 @@ class QSTileService : TileService() {
     private fun setTileState(active: Boolean) {
         qsTile?.let { tile ->
             tile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-            tile.label = "Sub Blocker"
+            tile.label = getString(R.string.tile_label)
             tile.updateTile()
         }
     }

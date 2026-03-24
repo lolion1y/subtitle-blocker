@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
-import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
@@ -31,7 +30,7 @@ class OverlayService : Service() {
     private var isHidden = false
     private var wasCollapsedBeforeHide = false
     private var savedBandY = 0
-    private var overlayType = 0
+    private var isViewAttached = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -43,12 +42,6 @@ class OverlayService : Service() {
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else
-            @Suppress("DEPRECATION")
-            WindowManager.LayoutParams.TYPE_PHONE
-
         overlayView = OverlayView(this)
         applySettings()
 
@@ -57,7 +50,7 @@ class OverlayService : Service() {
         layoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             overlayView.getTotalHeight(),
-            overlayType,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
@@ -66,7 +59,6 @@ class OverlayService : Service() {
             y = screenHeight - screenHeight / 4
         }
 
-        // Restore saved position if enabled
         if (Prefs.getRememberPosition(this) && Prefs.hasSavedPosition(this)) {
             layoutParams.y = Prefs.getSavedBandY(this)
             val savedWidth = Prefs.getSavedInnerWidth(this)
@@ -79,9 +71,11 @@ class OverlayService : Service() {
         }
 
         overlayView.onLayoutUpdate = { deltaY, newTotalHeight ->
-            layoutParams.y += deltaY
-            layoutParams.height = newTotalHeight
-            windowManager.updateViewLayout(overlayView, layoutParams)
+            if (isViewAttached && !isHidden && !isCollapsed) {
+                layoutParams.y += deltaY
+                layoutParams.height = newTotalHeight
+                windowManager.updateViewLayout(overlayView, layoutParams)
+            }
         }
 
         overlayView.onCollapse = { collapse() }
@@ -94,15 +88,13 @@ class OverlayService : Service() {
         }
 
         windowManager.addView(overlayView, layoutParams)
+        isViewAttached = true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_REFRESH -> {
                 applySettings()
-                if (!isCollapsed && !isHidden) {
-                    overlayView.invalidate()
-                }
             }
             ACTION_HIDE -> hideOverlay()
             ACTION_SHOW -> showOverlay()
@@ -127,6 +119,7 @@ class OverlayService : Service() {
         if (isCollapsed) return
         savedBandY = layoutParams.y
         windowManager.removeView(overlayView)
+        isViewAttached = false
 
         val d = resources.displayMetrics.density
         val tabWidth = (36 * d).toInt()
@@ -134,7 +127,7 @@ class OverlayService : Service() {
 
         val tp = WindowManager.LayoutParams(
             tabWidth, tabHeight,
-            overlayType,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
@@ -165,6 +158,7 @@ class OverlayService : Service() {
         }
         layoutParams.y = savedBandY
         windowManager.addView(overlayView, layoutParams)
+        isViewAttached = true
         isCollapsed = false
     }
 
@@ -172,11 +166,10 @@ class OverlayService : Service() {
         if (isHidden) return
         wasCollapsedBeforeHide = isCollapsed
         if (isCollapsed) {
-            collapseTabView?.let {
-                windowManager.removeView(it)
-            }
+            collapseTabView?.let { windowManager.removeView(it) }
         } else {
             windowManager.removeView(overlayView)
+            isViewAttached = false
         }
         isHidden = true
     }
@@ -191,6 +184,7 @@ class OverlayService : Service() {
         } else {
             applySettings()
             windowManager.addView(overlayView, layoutParams)
+            isViewAttached = true
         }
     }
 
@@ -198,15 +192,24 @@ class OverlayService : Service() {
         super.onDestroy()
         isRunning = false
 
-        // Save position if enabled
-        if (Prefs.getRememberPosition(this) && !isCollapsed) {
-            Prefs.savePosition(
-                this,
-                layoutParams.y,
-                overlayView.innerLeft,
-                overlayView.innerWidth,
-                overlayView.innerHeight
-            )
+        // Save position whether expanded or collapsed
+        if (Prefs.getRememberPosition(this)) {
+            val y = if (isCollapsed) savedBandY else layoutParams.y
+            if (!isCollapsed) {
+                Prefs.savePosition(
+                    this, y,
+                    overlayView.innerLeft,
+                    overlayView.innerWidth,
+                    overlayView.innerHeight
+                )
+            } else {
+                Prefs.savePosition(
+                    this, y,
+                    Prefs.getSavedInnerLeft(this).takeIf { it >= 0 } ?: 0,
+                    Prefs.getSavedInnerWidth(this).takeIf { it > 0 } ?: 0,
+                    Prefs.getSavedInnerHeight(this).takeIf { it > 0 } ?: 0
+                )
+            }
         }
 
         if (!isHidden) {
@@ -216,20 +219,19 @@ class OverlayService : Service() {
                 windowManager.removeView(overlayView)
             }
         }
+        isViewAttached = false
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Subtitle Screen Overlay",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Keeps the subtitle blocker overlay running"
-            }
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Subtitle Screen Overlay",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Keeps the subtitle blocker overlay running"
         }
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
     private fun buildNotification(): Notification {
