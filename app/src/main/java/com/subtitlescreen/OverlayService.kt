@@ -225,7 +225,7 @@ class OverlayService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Subtitle Screen Overlay",
+            "Subtitle Blocker Overlay",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = "Keeps the subtitle blocker overlay running"
@@ -242,7 +242,7 @@ class OverlayService : Service() {
         )
 
         return Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Subtitle Screen")
+            .setContentTitle("Subtitle Blocker")
             .setContentText("Overlay active. Tap to open app.")
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setContentIntent(pendingIntent)

@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Subtitle Screen</string>
+    <string name="app_name">Subtitle Blocker</string>
 
     <!-- Main activity -->
     <string name="show_overlay">Show Overlay</string>
     <string name="hide_overlay">Hide Overlay</string>
     <string name="overlay_permission_required">Overlay permission required</string>
+    <string name="main_instructions">Drag the bar to move up/down and left/right.\nUse the corner handles to resize.\nTap the \u00BB icon to collapse to a side tab.\nTriple-tap the bar to open settings.\n\nTo add the quick toggle to your pull-down tray:\nswipe down, tap the pencil/edit icon, then drag\n\"Sub Blocker\" into your active tiles.</string>
 
     <!-- Quick settings tile -->
     <string name="tile_label">Sub Blocker</string>
 
-    <!-- Settings labels (default: US English) -->
+    <!-- Settings -->
+    <string name="settings_title">Subtitle Blocker Settings</string>
     <string name="blocker_colour">Blocker Color</string>
     <string name="blocker_opacity">Blocker Opacity</string>
     <string name="edge_blend">Edge Blend</string>

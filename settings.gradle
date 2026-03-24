@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SubtitleScreen"
+rootProject.name = "SubtitleBlocker"
 include ':app'
