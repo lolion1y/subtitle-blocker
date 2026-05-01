@@ -220,15 +220,51 @@
             android:id="@+id/switchRemember"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="12dp"
             android:text="@string/remember_position"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/btnReset"
-            android:layout_width="wrap_content"
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchTabLeft"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/reset_defaults" />
+            android:layout_marginBottom="12dp"
+            android:text="@string/tab_on_left"
+            android:textSize="16sp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchSymmetricResize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/symmetric_resize"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="0dp"
+                android:layout_height="72dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/reset_defaults" />
+
+            <Button
+                android:id="@+id/btnStop"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="72dp"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:gravity="center"
+                android:text="@string/stop_overlay" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

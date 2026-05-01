@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.app.Notification
@@ -111,6 +127,8 @@ class OverlayService : Service() {
             Prefs.getFeather(this), resources.displayMetrics.density
         )
         overlayView.handleColorOverride = Prefs.getHandleColor(this)
+        overlayView.tabSide = Prefs.getTabSide(this)
+        overlayView.symmetricResize = Prefs.getSymmetricResize(this)
     }
 
     private var tabParams: WindowManager.LayoutParams? = null
@@ -125,19 +143,23 @@ class OverlayService : Service() {
         val tabWidth = (36 * d).toInt()
         val tabHeight = (56 * d).toInt()
 
+        val tabSide = Prefs.getTabSide(this)
+        val edgeGravity = if (tabSide == Prefs.TAB_SIDE_LEFT) Gravity.START else Gravity.END
+
         val tp = WindowManager.LayoutParams(
             tabWidth, tabHeight,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.END
+            gravity = Gravity.TOP or edgeGravity
             x = 0
             y = savedBandY
         }
         tabParams = tp
 
         collapseTabView = CollapseTabView(this).also {
+            it.tabSide = tabSide
             it.tabColor = Prefs.getTabColor(this)
             it.tabAlpha = Prefs.getTabAlpha(this).coerceAtLeast(Prefs.MIN_TAB_ALPHA)
             it.onClick = { expand() }
@@ -178,8 +200,15 @@ class OverlayService : Service() {
         if (!isHidden) return
         isHidden = false
         if (wasCollapsedBeforeHide) {
-            collapseTabView?.let {
-                tabParams?.let { tp -> windowManager.addView(it, tp) }
+            collapseTabView?.let { tab ->
+                // Pick up any tab-side change made in Settings while hidden
+                val tabSide = Prefs.getTabSide(this)
+                tab.tabSide = tabSide
+                tabParams?.let { tp ->
+                    tp.gravity = Gravity.TOP or
+                        if (tabSide == Prefs.TAB_SIDE_LEFT) Gravity.START else Gravity.END
+                    windowManager.addView(tab, tp)
+                }
             }
         } else {
             applySettings()

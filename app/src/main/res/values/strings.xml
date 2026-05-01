@@ -23,6 +23,9 @@
     <string name="tab_opacity">Tab Opacity (min 12%)</string>
     <string name="custom_colour_title">Custom Color</string>
     <string name="remember_position">Remember last position &amp; size</string>
+    <string name="tab_on_left">Collapse tab to left edge</string>
+    <string name="symmetric_resize">Symmetric resize (from centre)</string>
+    <string name="stop_overlay">Stop Overlay</string>
     <string name="reset_defaults">Reset to Defaults</string>
     <string name="reset_confirm_title">Reset to Defaults</string>
     <string name="reset_confirm_msg">This will reset all settings to their default values. Are you sure?</string>

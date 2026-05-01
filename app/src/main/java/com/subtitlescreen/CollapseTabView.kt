@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.content.Context
@@ -26,6 +42,8 @@ class CollapseTabView(context: Context) : View(context) {
         set(v) { field = v; updatePaints() }
     var tabAlpha = 0x60
         set(v) { field = v; updatePaints() }
+    var tabSide = Prefs.TAB_SIDE_RIGHT
+        set(v) { field = v; invalidate() }
 
     var onClick: (() -> Unit)? = null
     var onDragY: ((deltaY: Int) -> Unit)? = null
@@ -54,8 +72,14 @@ class CollapseTabView(context: Context) : View(context) {
         val cx = w / 2f
         val cy = h / 2f
         val s = 5f * density
-        canvas.drawLine(cx + s * 0.3f, cy - s, cx - s * 0.7f, cy, arrowPaint)
-        canvas.drawLine(cx - s * 0.7f, cy, cx + s * 0.3f, cy + s, arrowPaint)
+        // Chevron points away from the edge the tab is pinned to
+        if (tabSide == Prefs.TAB_SIDE_LEFT) {
+            canvas.drawLine(cx - s * 0.3f, cy - s, cx + s * 0.7f, cy, arrowPaint)
+            canvas.drawLine(cx + s * 0.7f, cy, cx - s * 0.3f, cy + s, arrowPaint)
+        } else {
+            canvas.drawLine(cx + s * 0.3f, cy - s, cx - s * 0.7f, cy, arrowPaint)
+            canvas.drawLine(cx - s * 0.7f, cy, cx + s * 0.3f, cy + s, arrowPaint)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

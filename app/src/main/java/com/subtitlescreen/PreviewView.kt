@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.content.Context
@@ -22,6 +38,7 @@ class PreviewView @JvmOverloads constructor(
     var tabAlpha = 0x60
     var featherPx = 0f
     var handleColorOverride = Prefs.HANDLE_COLOR_AUTO
+    var tabSide = Prefs.TAB_SIDE_RIGHT
 
     private val checkerLight = Paint().apply { color = 0xFFE0E0E0.toInt() }
     private val checkerDark = Paint().apply { color = 0xFFC0C0C0.toInt() }
@@ -123,16 +140,23 @@ class PreviewView @JvmOverloads constructor(
         val tH = 28f * density
         val tR = 3f * density
         val tT = (h - tH) / 2f
-        val tL = w - tW
+        val onLeft = tabSide == Prefs.TAB_SIDE_LEFT
+        val tL = if (onLeft) 0f else w - tW
+        val tRight = if (onLeft) tW else w
         tabPaint.color = (tabAlpha shl 24) or (tabColor and 0x00FFFFFF)
-        canvas.drawRoundRect(RectF(tL, tT, w, tT + tH), tR, tR, tabPaint)
+        canvas.drawRoundRect(RectF(tL, tT, tRight, tT + tH), tR, tR, tabPaint)
 
-        // Chevron on the tab (contrasting colour)
+        // Chevron on the tab (contrasting colour), pointing away from edge
         tabArrowPaint.color = DrawUtils.contrastColor(tabColor, tabAlpha, 0xDD)
         val tcx = tL + tW / 2f
         val tcy = tT + tH / 2f
         val s = 3f * density
-        canvas.drawLine(tcx + s * 0.3f, tcy - s, tcx - s * 0.7f, tcy, tabArrowPaint)
-        canvas.drawLine(tcx - s * 0.7f, tcy, tcx + s * 0.3f, tcy + s, tabArrowPaint)
+        if (onLeft) {
+            canvas.drawLine(tcx - s * 0.3f, tcy - s, tcx + s * 0.7f, tcy, tabArrowPaint)
+            canvas.drawLine(tcx + s * 0.7f, tcy, tcx - s * 0.3f, tcy + s, tabArrowPaint)
+        } else {
+            canvas.drawLine(tcx + s * 0.3f, tcy - s, tcx - s * 0.7f, tcy, tabArrowPaint)
+            canvas.drawLine(tcx - s * 0.7f, tcy, tcx + s * 0.3f, tcy + s, tabArrowPaint)
+        }
     }
 }

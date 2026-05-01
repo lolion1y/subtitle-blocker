@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.content.Context
@@ -24,6 +40,8 @@ object Prefs {
     private const val INNER_HEIGHT = "inner_height"
     private const val FEATHER = "feather"
     private const val HAS_SAVED = "has_saved"
+    private const val TAB_SIDE = "tab_side"
+    private const val SYMMETRIC_RESIZE = "symmetric_resize"
 
     // Defaults
     const val DEFAULT_INNER_COLOR = 0x000000
@@ -38,6 +56,10 @@ object Prefs {
     const val DEFAULT_INNER_HEIGHT_DP = 80
     const val HANDLE_COLOR_AUTO = Int.MIN_VALUE
     const val DEFAULT_HANDLE_COLOR = HANDLE_COLOR_AUTO
+
+    const val TAB_SIDE_RIGHT = 0
+    const val TAB_SIDE_LEFT = 1
+    const val DEFAULT_TAB_SIDE = TAB_SIDE_RIGHT
 
     private fun prefs(ctx: Context): SharedPreferences =
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -73,6 +95,13 @@ object Prefs {
     fun getRememberPosition(ctx: Context) = prefs(ctx).getBoolean(REMEMBER_POS, true)
     fun setRememberPosition(ctx: Context, v: Boolean) =
         prefs(ctx).edit().putBoolean(REMEMBER_POS, v).apply()
+
+    fun getTabSide(ctx: Context) = prefs(ctx).getInt(TAB_SIDE, DEFAULT_TAB_SIDE)
+    fun setTabSide(ctx: Context, v: Int) = prefs(ctx).edit().putInt(TAB_SIDE, v).apply()
+
+    fun getSymmetricResize(ctx: Context) = prefs(ctx).getBoolean(SYMMETRIC_RESIZE, false)
+    fun setSymmetricResize(ctx: Context, v: Boolean) =
+        prefs(ctx).edit().putBoolean(SYMMETRIC_RESIZE, v).apply()
 
     fun hasSavedPosition(ctx: Context) = prefs(ctx).getBoolean(HAS_SAVED, false)
 

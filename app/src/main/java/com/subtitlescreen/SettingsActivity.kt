@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.content.Intent
@@ -50,6 +66,8 @@ class SettingsActivity : AppCompatActivity() {
     private val d by lazy { resources.displayMetrics.density }
     private fun dpPx(v: Int) = (v * d).toInt()
 
+    private var overlayStopped = false
+
     private fun alphaPct(alpha: Int) = "${alpha * 100 / 255}%"
 
     override fun onResume() {
@@ -59,7 +77,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        sendServiceAction(OverlayService.ACTION_SHOW)
+        if (!overlayStopped) sendServiceAction(OverlayService.ACTION_SHOW)
     }
 
     private fun sendServiceAction(action: String) {
@@ -108,9 +126,41 @@ class SettingsActivity : AppCompatActivity() {
         setupColorRow(R.id.colorRowHandle, handlePicker)
         setupSliders()
         setupRememberToggle()
+        setupTabSideToggle()
+        setupSymmetricResizeToggle()
         setupResetButton()
+        setupStopButton()
         updateAllValues()
         updatePreview()
+    }
+
+    private fun setupTabSideToggle() {
+        val sw = findViewById<MaterialSwitch>(R.id.switchTabLeft)
+        sw.isChecked = Prefs.getTabSide(this) == Prefs.TAB_SIDE_LEFT
+        sw.setOnCheckedChangeListener { _, checked ->
+            Prefs.setTabSide(
+                this,
+                if (checked) Prefs.TAB_SIDE_LEFT else Prefs.TAB_SIDE_RIGHT
+            )
+            notifyService(); updatePreview()
+        }
+    }
+
+    private fun setupSymmetricResizeToggle() {
+        val sw = findViewById<MaterialSwitch>(R.id.switchSymmetricResize)
+        sw.isChecked = Prefs.getSymmetricResize(this)
+        sw.setOnCheckedChangeListener { _, checked ->
+            Prefs.setSymmetricResize(this, checked)
+            notifyService()
+        }
+    }
+
+    private fun setupStopButton() {
+        findViewById<Button>(R.id.btnStop).setOnClickListener {
+            overlayStopped = true
+            stopService(Intent(this, OverlayService::class.java))
+            finish()
+        }
     }
 
     private fun setupColorRow(rowId: Int, picker: ColorPicker) {
@@ -381,6 +431,7 @@ class SettingsActivity : AppCompatActivity() {
         preview.featherPx = Prefs.featherToPx(Prefs.getFeather(this), d)
         val hc = Prefs.getHandleColor(this)
         preview.handleColorOverride = hc
+        preview.tabSide = Prefs.getTabSide(this)
         preview.refresh()
     }
 
@@ -420,6 +471,8 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<SeekBar>(R.id.seekTabAlpha).progress = Prefs.alphaToSlider(Prefs.DEFAULT_TAB_ALPHA)
         findViewById<SeekBar>(R.id.seekFeather).progress = Prefs.DEFAULT_FEATHER
         findViewById<MaterialSwitch>(R.id.switchRemember).isChecked = true
+        findViewById<MaterialSwitch>(R.id.switchTabLeft).isChecked = false
+        findViewById<MaterialSwitch>(R.id.switchSymmetricResize).isChecked = false
         updateAllValues()
         notifyService(); updatePreview()
     }

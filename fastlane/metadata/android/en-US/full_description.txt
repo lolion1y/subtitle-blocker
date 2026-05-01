@@ -1,0 +1,15 @@
+This super-niche application was developed purely to deal with a strong dislike of the fast-moving, distracting subtitles that are hard-coded into many social media videos and cannot be turned off.
+
+When enabled, the overlay can either be docked as a small unobtrusive tab on the side of the screen, or expanded into a resizable, moveable rectangle which can be dragged to cover the area displaying subtitles. Colours, opacity, which edge the tab pins to, and symmetric (centre-anchored) resize are all configurable.
+
+Basic operation should be completely obvious:
+
+• Tap the chevrons »  in the middle of the overlay to collapse it to a side tab.
+• Tap the tab to expand it again.
+• Drag any corner to resize.
+• Drag anywhere else to move.
+• Triple-tap the overlay to open Settings.
+
+You can add the "Sub Blocker" tile to your Android Quick Settings panel (swipe down, tap the edit pencil, drag the tile into your active tiles) to quickly toggle the overlay on and off without opening the app.
+
+Feedback and feature requests are welcome.

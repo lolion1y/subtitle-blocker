@@ -1,3 +1,19 @@
+/*
+ * Subtitle Blocker — overlay to mask hard-coded video subtitles.
+ * Copyright (C) 2026 Jonathan Heard
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.subtitlescreen
 
 import android.content.Context
@@ -15,7 +31,7 @@ class OverlayView(context: Context) : View(context) {
 
     // Layout
     private val borderV = dpInt(3f)
-    private val handleTouchRadius = dp(28f)
+    private val handleTouchRadius = dp(40f)
     private val handleVisualLen = dp(14f)
     private val handleStroke = dp(2.5f)
     private val collapseTouchRadius = dp(18f)
@@ -40,6 +56,9 @@ class OverlayView(context: Context) : View(context) {
     var featherPx = 0f
     var handleColorOverride = Prefs.HANDLE_COLOR_AUTO
         set(v) { field = v; updatePaints() }
+    var tabSide = Prefs.TAB_SIDE_RIGHT
+        set(v) { field = v; invalidate() }
+    var symmetricResize = false
 
     // Paints
     private val bandPaint = Paint()
@@ -122,17 +141,26 @@ class OverlayView(context: Context) : View(context) {
         canvas.drawLine(iR, iB, iR - h, iB, handlePaint)
         canvas.drawLine(iR, iB, iR, iB - h, handlePaint)
 
-        // Collapse button (» double chevron pointing right)
+        // Collapse button (» pointing right, or « pointing left)
         val cx = (iL + iR) / 2f
         val cy = (iT + iB) / 2f
         val chevH = dp(5f)
         val chevW = dp(3.5f)
-        val p1 = cx - dp(1.5f)
-        canvas.drawLine(p1 - chevW, cy - chevH, p1, cy, collapsePaint)
-        canvas.drawLine(p1, cy, p1 - chevW, cy + chevH, collapsePaint)
-        val p2 = cx + dp(4.5f)
-        canvas.drawLine(p2 - chevW, cy - chevH, p2, cy, collapsePaint)
-        canvas.drawLine(p2, cy, p2 - chevW, cy + chevH, collapsePaint)
+        if (tabSide == Prefs.TAB_SIDE_LEFT) {
+            val p1 = cx + dp(1.5f)
+            canvas.drawLine(p1 + chevW, cy - chevH, p1, cy, collapsePaint)
+            canvas.drawLine(p1, cy, p1 + chevW, cy + chevH, collapsePaint)
+            val p2 = cx - dp(4.5f)
+            canvas.drawLine(p2 + chevW, cy - chevH, p2, cy, collapsePaint)
+            canvas.drawLine(p2, cy, p2 + chevW, cy + chevH, collapsePaint)
+        } else {
+            val p1 = cx - dp(1.5f)
+            canvas.drawLine(p1 - chevW, cy - chevH, p1, cy, collapsePaint)
+            canvas.drawLine(p1, cy, p1 - chevW, cy + chevH, collapsePaint)
+            val p2 = cx + dp(4.5f)
+            canvas.drawLine(p2 - chevW, cy - chevH, p2, cy, collapsePaint)
+            canvas.drawLine(p2, cy, p2 - chevW, cy + chevH, collapsePaint)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -207,25 +235,46 @@ class OverlayView(context: Context) : View(context) {
                         val isLeft = mode == Mode.RESIZE_TL || mode == Mode.RESIZE_BL
                         val isTop = mode == Mode.RESIZE_TL || mode == Mode.RESIZE_TR
 
-                        if (isLeft) {
-                            val maxDx = innerWidth - minInnerWidth
-                            val clampedDx = dx.coerceIn(-innerLeft, maxDx)
-                            innerLeft += clampedDx
-                            innerWidth -= clampedDx
-                        } else {
-                            innerWidth = (innerWidth + dx).coerceIn(
-                                minInnerWidth,
-                                (width - innerLeft).coerceAtLeast(minInnerWidth)
-                            )
-                        }
+                        if (symmetricResize) {
+                            // Positive growDx/growDy = grow outward from centre,
+                            // negative = shrink toward centre. Both edges move by
+                            // growDx/growDy, keeping the inner rect centre fixed.
+                            val growDx = if (isLeft) -dx else dx
+                            val growDy = if (isTop) -dy else dy
 
-                        if (isTop) {
-                            val maxDy = innerHeight - minInnerHeight
-                            val clampedDy = dy.coerceAtMost(maxDy)
-                            innerHeight -= clampedDy
-                            bandDy = clampedDy
+                            val slackL = innerLeft
+                            val slackR = (width - innerLeft - innerWidth).coerceAtLeast(0)
+                            val maxGrowDx = minOf(slackL, slackR)
+                            val minGrowDx = -((innerWidth - minInnerWidth) / 2)
+                            val clampedGrowDx = growDx.coerceIn(minGrowDx, maxGrowDx)
+                            innerLeft -= clampedGrowDx
+                            innerWidth += 2 * clampedGrowDx
+
+                            val minGrowDy = -((innerHeight - minInnerHeight) / 2)
+                            val clampedGrowDy = growDy.coerceAtLeast(minGrowDy)
+                            innerHeight += 2 * clampedGrowDy
+                            bandDy = -clampedGrowDy
                         } else {
-                            innerHeight = (innerHeight + dy).coerceAtLeast(minInnerHeight)
+                            if (isLeft) {
+                                val maxDx = innerWidth - minInnerWidth
+                                val clampedDx = dx.coerceIn(-innerLeft, maxDx)
+                                innerLeft += clampedDx
+                                innerWidth -= clampedDx
+                            } else {
+                                innerWidth = (innerWidth + dx).coerceIn(
+                                    minInnerWidth,
+                                    (width - innerLeft).coerceAtLeast(minInnerWidth)
+                                )
+                            }
+
+                            if (isTop) {
+                                val maxDy = innerHeight - minInnerHeight
+                                val clampedDy = dy.coerceAtMost(maxDy)
+                                innerHeight -= clampedDy
+                                bandDy = clampedDy
+                            } else {
+                                innerHeight = (innerHeight + dy).coerceAtLeast(minInnerHeight)
+                            }
                         }
 
                         onLayoutUpdate?.invoke(bandDy, getTotalHeight())

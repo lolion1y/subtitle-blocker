@@ -1,0 +1,1 @@
+Overlay to mask hard-coded subtitles on videos and social media.
