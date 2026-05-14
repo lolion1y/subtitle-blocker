@@ -1,12 +1,23 @@
+// =====================================================================
+// F-DROID BUILD CONSTRAINT — DO NOT ADD THE FOOJAY RESOLVER PLUGIN
+//
+// Android Studio likes to auto-insert:
+//   id 'org.gradle.toolchains.foojay-resolver-convention' ...
+// into the plugins {} block below. DO NOT ACCEPT THAT SUGGESTION.
+//
+// That plugin downloads a proprietary JDK from api.foojay.io at build
+// time, which F-Droid's scanner flags as a "usual suspect" and refuses
+// to build (see MR !37501). Likewise do not commit
+// gradle/gradle-daemon-jvm.properties — it's gitignored for the same
+// reason. The plain sourceCompatibility/targetCompatibility settings
+// in app/build.gradle are sufficient.
+// =====================================================================
 pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
     }
-}
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

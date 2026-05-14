@@ -7,5 +7,7 @@
 /captures
 .externalNativeBuild
 .cxx
+# F-Droid: keep auto-generated foojay/JDK-fetch artefacts out of the repo
+gradle/gradle-daemon-jvm.properties
 local.properties
 prompt-log.txt
